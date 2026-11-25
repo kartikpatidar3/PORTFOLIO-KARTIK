@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kartik Patidar | Cyber-Sec Operative</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['Fira Code', 'monospace'],
+                        display: ['Rajdhani', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            bg: '#050505',
+                            panel: 'rgba(10, 15, 20, 0.75)',
+                            neon: '#00ff9d',
+                            cyan: '#00e5ff',
+                            alert: '#ff003c'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #00ff9d;
+            font-family: 'Fira Code', monospace;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor */
+        }
+
+        /* Custom Cursor */
+        #custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #00ff9d;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #custom-cursor::before, #custom-cursor::after {
+            content: '';
+            position: absolute;
+            background: #00e5ff;
+        }
+        #custom-cursor::before { width: 10px; height: 1px; }
+        #custom-cursor::after { width: 1px; height: 10px; }
+        .cursor-hover {
+            width: 50px !important;
+            height: 50px !important;
+            background-color: rgba(0, 255, 157, 0.1);
+            border-color: #00e5ff !important;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+        }
+
+        /* Scanlines Overlay */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9000;
+            opacity: 0.6;
+        }
+
+        /* Canvas Background */
+        #network-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        /* Boot Sequence */
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+            transition: opacity 1s ease-out;
+        }
+        .terminal-text {
+            color: #00ff9d;
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px #00ff9d;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Glitch Effect */
+        .glitch {
+            position: relative;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff003c;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #00e5ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { clip: rect(13px, 9999px, 86px, 0); }
+            5% { clip: rect(61px, 9999px, 48px, 0); }
+            10% { clip: rect(57px, 9999px, 80px, 0); }
+            15% { clip: rect(6px, 9999px, 3px, 0); }
+            20% { clip: rect(11px, 9999px, 34px, 0); }
+            25% { clip: rect(12px, 9999px, 5px, 0); }
+            30% { clip: rect(74px, 9999px, 51px, 0); }
+            35% { clip: rect(65px, 9999px, 45px, 0); }
+            40% { clip: rect(12px, 9999px, 51px, 0); }
+            45% { clip: rect(57px, 9999px, 34px, 0); }
+            50% { clip: rect(18px, 9999px, 86px, 0); }
+            55% { clip: rect(61px, 9999px, 48px, 0); }
+            60% { clip: rect(57px, 9999px, 80px, 0); }
+            65% { clip: rect(6px, 9999px, 3px, 0); }
+            70% { clip: rect(11px, 9999px, 34px, 0); }
+            75% { clip: rect(12px, 9999px, 5px, 0); }
+            80% { clip: rect(74px, 9999px, 51px, 0); }
+            85% { clip: rect(65px, 9999px, 45px, 0); }
+            90% { clip: rect(12px, 9999px, 51px, 0); }
+            95% { clip: rect(57px, 9999px, 34px, 0); }
+            100% { clip: rect(18px, 9999px, 86px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            5% { clip: rect(52px, 9999px, 74px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            15% { clip: rect(75px, 9999px, 5px, 0); }
+            20% { clip: rect(67px, 9999px, 61px, 0); }
+            25% { clip: rect(14px, 9999px, 79px, 0); }
+            30% { clip: rect(1px, 9999px, 66px, 0); }
+            35% { clip: rect(86px, 9999px, 30px, 0); }
+            40% { clip: rect(23px, 9999px, 98px, 0); }
+            45% { clip: rect(85px, 9999px, 72px, 0); }
+            50% { clip: rect(71px, 9999px, 75px, 0); }
+            55% { clip: rect(2px, 9999px, 48px, 0); }
+            60% { clip: rect(30px, 9999px, 16px, 0); }
+            65% { clip: rect(59px, 9999px, 50px, 0); }
+            70% { clip: rect(41px, 9999px, 62px, 0); }
+            75% { clip: rect(2px, 9999px, 82px, 0); }
+            80% { clip: rect(47px, 9999px, 73px, 0); }
+            85% { clip: rect(3px, 9999px, 27px, 0); }
+            90% { clip: rect(26px, 9999px, 55px, 0); }
+            95% { clip: rect(42px, 9999px, 97px, 0); }
+            100% { clip: rect(38px, 9999px, 49px, 0); }
+        }
+
+        /* Glass Panels */
+        .glass-panel {
+            background: var(--tw-colors-cyber-panel);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 157, 0.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 255, 157, 0.05);
+            position: relative;
+        }
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 10px; height: 10px;
+            border-top: 2px solid #00e5ff;
+            border-left: 2px solid #00e5ff;
+        }
+        .glass-panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 10px; height: 10px;
+            border-bottom: 2px solid #00e5ff;
+            border-right: 2px solid #00e5ff;
+        }
+
+        /* Hexagon Badges */
+        .hex-badge {
+            width: 100px;
+            height: 110px;
+            background: rgba(0, 229, 255, 0.1);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .hex-wrapper {
+            filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.5));
+            transition: filter 0.3s ease;
+        }
+        .hex-wrapper:hover {
+            filter: drop-shadow(0 0 15px rgba(0, 255, 157, 0.8));
+        }
+        .hex-badge:hover {
+            background: rgba(0, 255, 157, 0.2);
+        }
+        .hex-inner {
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            background: #050505;
+            width: 96px;
+            height: 106px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 5px;
+        }
+
+        /* Holographic Tilt Cards */
+        .tilt-card-wrapper {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+        .tilt-card {
+            transition: transform 0.1s;
+            transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+            transform-style: preserve-3d;
+        }
+        .tilt-content {
+            transform: translateZ(30px);
+        }
+        
+        /* Blinking Cursor for Terminal Typing */
+        .blinking-cursor::after {
+            content: '_';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Progress Bar Animation */
+        .upload-bar {
+            background: repeating-linear-gradient(
+                45deg,
+                #00ff9d,
+                #00ff9d 10px,
+                #005533 10px,
+                #005533 20px
+            );
+            background-size: 28px 28px;
+            animation: upload-anim 1s linear infinite;
+        }
+        @keyframes upload-anim {
+            0% { background-position: 0 0; }
+            100% { background-position: 28px 0; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050505; border-left: 1px solid #111; }
+        ::-webkit-scrollbar-thumb { background: #00ff9d; border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
+
+    </style>
+</head>
+<body class="relative min-h-screen">
+
+    <!-- Custom Cursor -->
+    <div id="custom-cursor"></div>
+
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+
+    <!-- Canvas Background -->
+    <canvas id="network-canvas"></canvas>
+
+    <!-- Boot Sequence -->
+    <div id="boot-screen">
+        <div id="boot-text-container" class="font-mono text-left max-w-3xl mx-auto w-full"></div>
+    </div>
+
+    <!-- Main Dashboard UI -->
+    <main class="relative z-10 px-4 py-8 md:p-8 max-w-[1600px] mx-auto opacity-0 transition-opacity duration-1000" id="main-content">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-12 glass-panel p-4 rounded-sm">
+            <div class="flex items-center gap-4">
+                <i class="fa-solid fa-shield-virus text-3xl text-cyber-cyan animate-pulse"></i>
+                <div>
+                    <div class="text-xs text-cyber-cyan tracking-[0.2em] uppercase">Status: Online</div>
+                    <div class="font-display text-2xl font-bold text-white tracking-widest">SEC_NODE_01</div>
+                </div>
+            </div>
+            <div class="hidden md:flex gap-6 text-sm">
+                <a href="#databanks" class="hover:text-cyber-cyan transition-colors interactive">/DATABANKS</a>
+                <a href="#mission-logs" class="hover:text-cyber-cyan transition-colors interactive">/MISSION_LOGS</a>
+                <a href="#sys-logs" class="hover:text-cyber-cyan transition-colors interactive">/SYS_LOGS</a>
+                <a href="#comm-link" class="hover:text-cyber-cyan transition-colors interactive">/COMM_LINK</a>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Hero / Profile Widget (Span 4) -->
+            <div class="lg:col-span-4 flex flex-col gap-8">
+                <div class="glass-panel p-8 flex flex-col items-center text-center">
+                    <div class="relative w-40 h-40 mb-6">
+                        <svg class="absolute inset-0 w-full h-full animate-[spin_10s_linear_infinite]" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#00e5ff" stroke-width="1" stroke-dasharray="10 5" />
+                            <circle cx="50" cy="50" r="38" fill="none" stroke="#00ff9d" stroke-width="2" stroke-dasharray="20 10 5 10" />
+                        </svg>
+                        <div class="absolute inset-2 bg-black rounded-full overflow-hidden flex items-center justify-center border border-cyber-cyan/30">
+                            <i class="fa-solid fa-user-secret text-6xl text-gray-500"></i>
+                        </div>
+                    </div>
+                    
+                    <h1 class="text-4xl md:text-5xl glitch mb-2" data-text="KARTIK PATIDAR">KARTIK PATIDAR</h1>
+                    <div class="bg-cyber-cyan/10 border border-cyber-cyan px-4 py-1 text-cyber-cyan text-sm mb-6 inline-block">
+                        > CYBERSECURITY_OPERATIVE
+                    </div>
+                    
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        Securing the digital frontier. Analyzing threats, fortifying network defenses, and decrypting logic. Based in Ratlam, MP. Pursuing B.Tech CSE (Hons) with Cybersecurity.
+                    </p>
+                    
+                    <div class="w-full flex justify-between text-xs font-mono border-t border-cyber-neon/20 pt-4">
+                        <span class="text-gray-500">SYS.UPTIME: <span class="text-cyber-neon animate-pulse">99.9%</span></span>
+                        <span class="text-gray-500">CLEARANCE: <span class="text-cyber-alert">LEVEL 4</span></span>
+                    </div>
+                </div>
+
+                <!-- Live Upload Widget -->
+                <div class="glass-panel p-6">
+                    <h3 class="text-cyber-cyan text-sm tracking-widest mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-satellite-dish"></i> DATA_STREAM
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>Decrypting Cryptography</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="h-2 w-full bg-gray-900 border border-gray-700 p-[1px]">
+                                <div class="h-full upload-bar" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>TCP/IP Protocol Mapping</span>
+                                <span>92%</span>
+                            </div>
+                            <div class="h-2 w-full bg-gray-900 border border-gray-700 p-[1px]">
+                                <div class="h-full upload-bar" style="width: 92%; animation-direction: reverse;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area (Span 8) -->
+            <div class="lg:col-span-8 flex flex-col gap-8">
+                
+                <!-- Skills Databanks -->
+                <section id="databanks" class="glass-panel p-6 md:p-8">
+                    <h2 class="text-2xl font-display text-white mb-6 border-b border-white/10 pb-4">
+                        <span class="text-cyber-neon">>_</span> MODULES_&_DATABANKS
+                    </h2>
+                    
+                    <div class="flex flex-wrap justify-center md:justify-start gap-4 md:gap-6 mt-8">
+                        
+                        <!-- Hex Item 1 -->
+                        <div class="hex-wrapper interactive">
+                            <div class="hex-badge">
+                                <div class="hex-inner">
+                                    <i class="fa-solid fa-network-wired text-cyber-cyan text-xl mb-2"></i>
+                                    <span class="text-[10px] text-gray-300">TCP/IP</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hex Item 2 -->
+                        <div class="hex-wrapper interactive">
+                            <div class="hex-badge">
+                                <div class="hex-inner">
+                                    <i class="fa-solid fa-lock text-cyber-neon text-xl mb-2"></i>
+                                    <span class="text-[10px] text-gray-300">Crypto</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hex Item 3 -->
+                        <div class="hex-wrapper interactive">
+                            <div class="hex-badge">
+                                <div class="hex-inner">
+                                    <i class="fa-brands fa-linux text-yellow-400 text-xl mb-2"></i>
+                                    <span class="text-[10px] text-gray-300">Kali OS</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hex Item 4 -->
+                        <div class="hex-wrapper interactive">
+                            <div class="hex-badge">
+                                <div class="hex-inner">
+                                    <i class="fa-solid fa-c text-blue-400 text-xl mb-2"></i>
+                                    <span class="text-[10px] text-gray-300">C Prog</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hex Item 5 -->
+                        <div class="hex-wrapper interactive">
+                            <div class="hex-badge">
+                                <div class="hex-inner">
+                                    <i class="fa-brands fa-python text-green-400 text-xl mb-2"></i>
+                                    <span class="text-[10px] text-gray-300">Python</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hex Item 6 -->
+                        <div class="hex-wrapper interactive">
+                            <div class="hex-badge">
+                                <div class="hex-inner">
+                                    <i class="fa-solid fa-shield text-purple-400 text-xl mb-2"></i>
+                                    <span class="text-[10px] text-gray-300">Firewalls</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hex Item 7 -->
+                        <div class="hex-wrapper interactive">
+                            <div class="hex-badge">
+                                <div class="hex-inner">
+                                    <i class="fa-solid fa-eye text-red-400 text-xl mb-2"></i>
+                                    <span class="text-[10px] text-gray-300">Nmap</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Mission Logs (Projects) -->
+                <section id="mission-logs" class="glass-panel p-6 md:p-8">
+                    <h2 class="text-2xl font-display text-white mb-6 border-b border-white/10 pb-4">
+                        <span class="text-cyber-cyan">sys.</span>MISSION_LOGS
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Project 1 -->
+                        <div class="tilt-card-wrapper interactive">
+                            <div class="tilt-card bg-black border border-cyber-neon/30 p-6 h-full relative overflow-hidden group">
+                                <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyber-neon/10 rounded-full blur-2xl group-hover:bg-cyber-neon/20 transition-all"></div>
+                                <div class="tilt-content">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <i class="fa-solid fa-microchip text-3xl text-cyber-neon"></i>
+                                        <span class="text-xs bg-cyber-neon/10 text-cyber-neon px-2 py-1 border border-cyber-neon/50">OCT 2026</span>
+                                    </div>
+                                    <h3 class="text-xl font-display font-bold text-white mb-2">Multimodal AI Matrix</h3>
+                                    <p class="text-sm text-gray-400 mb-4 line-clamp-3">
+                                        Researched and deployed real-world applications of multimodal AI architectures. Engineered clear explanations of complex algorithms for team presentations.
+                                    </p>
+                                    <div class="flex gap-2">
+                                        <span class="text-[10px] px-2 py-1 bg-white/5 border border-white/10 text-gray-300">AI</span>
+                                        <span class="text-[10px] px-2 py-1 bg-white/5 border border-white/10 text-gray-300">Research</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project 2 -->
+                        <div class="tilt-card-wrapper interactive">
+                            <div class="tilt-card bg-black border border-cyber-cyan/30 p-6 h-full relative overflow-hidden group">
+                                <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyber-cyan/10 rounded-full blur-2xl group-hover:bg-cyber-cyan/20 transition-all"></div>
+                                <div class="tilt-content">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <i class="fa-solid fa-terminal text-3xl text-cyber-cyan"></i>
+                                        <span class="text-xs bg-cyber-cyan/10 text-cyber-cyan px-2 py-1 border border-cyber-cyan/50">SEP 2026</span>
+                                    </div>
+                                    <h3 class="text-xl font-display font-bold text-white mb-2">Logic-Breaker (C Prog)</h3>
+                                    <p class="text-sm text-gray-400 mb-4 line-clamp-3">
+                                        Developed C programs utilizing control structures and arrays to solve complex computational problems. Designed step-by-step algorithms prior to execution.
+                                    </p>
+                                    <div class="flex gap-2">
+                                        <span class="text-[10px] px-2 py-1 bg-white/5 border border-white/10 text-gray-300">C Language</span>
+                                        <span class="text-[10px] px-2 py-1 bg-white/5 border border-white/10 text-gray-300">Algorithms</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- System Logs (Edu & Extra) -->
+                <section id="sys-logs" class="glass-panel p-6 md:p-8 bg-black/80">
+                    <h2 class="text-2xl font-display text-white mb-4">
+                        <span class="text-cyber-alert">KARTIK</span> cat sys_logs.txt
+                    </h2>
+                    <div class="bg-[#0a0a0a] border border-[#333] p-4 font-mono text-sm text-gray-300 h-64 overflow-y-auto" id="terminal-output">
+                        <!-- Content typed via JS -->
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <!-- Footer / Contact -->
+        <footer id="comm-link" class="mt-8 glass-panel p-8 text-center">
+            <h2 class="text-cyber-cyan text-sm tracking-[0.3em] mb-6">ESTABLISH_COMM_LINK</h2>
+            <div class="flex flex-col sm:flex-row justify-center gap-6 mb-8">
+                <a href="mailto:kartikpatidar407@gmail.com" class="interactive px-6 py-3 border border-cyber-neon/50 text-cyber-neon hover:bg-cyber-neon/10 transition-colors flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-envelope"></i> EMAIL_NODE
+                </a>
+                <a href="tel:+919109529242" class="interactive px-6 py-3 border border-cyber-cyan/50 text-cyber-cyan hover:bg-cyber-cyan/10 transition-colors flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-phone"></i> SECURE_LINE
+                </a>
+                <a href="https://linkedin.com/in/Kartik-Patidar" target="_blank" class="interactive px-6 py-3 border border-blue-500/50 text-blue-400 hover:bg-blue-500/10 transition-colors flex items-center justify-center gap-3">
+                    <i class="fa-brands fa-linkedin-in"></i> NETWORK_PROFILE
+                </a>
+            </div>
+            <p class="text-xs text-gray-600 font-mono">
+                [SYSTEM BUILD v1.0.26] // KARTIK PATIDAR &copy; 2026<br/>
+                <span class="text-cyber-alert animate-pulse">CONNECTION SECURED</span>
+            </p>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        // Custom Cursor Logic
+        const cursor = document.getElementById('custom-cursor');
+        const interactives = document.querySelectorAll('.interactive, a, button');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        interactives.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
+        });
+
+        // Network Particle Canvas
+        const canvas = document.getElementById('network-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.size = Math.random() * 2 + 1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = '#00ff9d';
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const numParticles = Math.min(Math.floor(window.innerWidth / 15), 100);
+            for (let i = 0; i < numParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(0, 229, 255, ${1 - dist / 150})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        initParticles();
+        animateParticles();
+
+        // Boot-Up Sequence
+        const bootText = [
+            "Initiating kernel... OK",
+            "Loading network drivers... OK",
+            "Mounting encrypted file system... OK",
+            "Establishing secure connection to SEC_NODE_01...",
+            "Decrypting profile data...",
+            "Bypassing firewall protocols... SUCCESS",
+            "> ACCESS GRANTED <"
+        ];
+        const bootContainer = document.getElementById('boot-text-container');
+        const bootScreen = document.getElementById('boot-screen');
+        const mainContent = document.getElementById('main-content');
+        
+        let bootIndex = 0;
+        
+        function typeBootSequence() {
+            if (bootIndex < bootText.length) {
+                const p = document.createElement('p');
+                p.className = 'terminal-text ' + (bootIndex === bootText.length - 1 ? 'text-cyber-cyan text-2xl mt-4 font-bold' : '');
+                p.textContent = bootText[bootIndex];
+                bootContainer.appendChild(p);
+                bootIndex++;
+                setTimeout(typeBootSequence, Math.random() * 400 + 200);
+            } else {
+                setTimeout(() => {
+                    bootScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        bootScreen.style.display = 'none';
+                        mainContent.style.opacity = '1';
+                        // Start terminal typing effect after boot
+                        startTerminalTyping();
+                    }, 1000);
+                }, 800);
+            }
+        }
+        
+        // Start boot sequence on load
+        window.addEventListener('load', () => {
+            setTimeout(typeBootSequence, 500);
+        });
+
+        // 3D Tilt Effect for Project Cards
+        const tiltWrappers = document.querySelectorAll('.tilt-card-wrapper');
+        tiltWrappers.forEach(wrapper => {
+            const card = wrapper.querySelector('.tilt-card');
+            wrapper.addEventListener('mousemove', (e) => {
+                const rect = wrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -15; 
+                const rotateY = ((x - centerX) / centerX) * 15;
+                
+                card.style.setProperty('--rx', `${rotateX}deg`);
+                card.style.setProperty('--ry', `${rotateY}deg`);
+            });
+            wrapper.addEventListener('mouseleave', () => {
+                card.style.setProperty('--rx', `0deg`);
+                card.style.setProperty('--ry', `0deg`);
+                card.style.transition = 'transform 0.5s ease-out';
+                setTimeout(() => card.style.transition = 'transform 0.1s', 500);
+            });
+        });
+
+        // Terminal Typing Effect for Sys Logs
+        const terminalOutput = document.getElementById('terminal-output');
+        const logContent = `[SYSTEM LOG START]
+Fetching Education Records...
+[OK] Karnavati University - B.Tech CSE (Hons) Cybersecurity [Exp. 2030]
+[OK] Himalaya International School - Class XII [2026] | 78.9%
+[OK] Himalaya International School - Class X [2024] | 87.5%
+
+Fetching Extra-Curricular Databanks...
+> Executing query...
+[RECORD] Participated in SMART INDIA HACKATHON 2026
+[RECORD] Lead Organizer for Interschool Tech Program (10+ Schools)
+[RECORD] Active Volunteer / Facilitator for Interschool MUNs
+
+Soft Skills Matrix Decoded:
+[+] Teamwork
+[+] Communication
+[+] Time Management
+[+] Adaptability
+
+[SYSTEM LOG END]`;
+
+        let logIndex = 0;
+        let isTyping = false;
+
+        function startTerminalTyping() {
+            if(isTyping) return;
+            isTyping = true;
+            
+            const typingSpan = document.createElement('span');
+            typingSpan.className = 'blinking-cursor';
+            terminalOutput.appendChild(typingSpan);
+
+            function typeLog() {
+                if (logIndex < logContent.length) {
+                    const char = logContent.charAt(logIndex);
+                    // Add character before cursor
+                    typingSpan.insertAdjacentText('beforebegin', char);
+                    if(char === '\n') {
+                         typingSpan.insertAdjacentHTML('beforebegin', '<br/>');
+                    }
+                    logIndex++;
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    setTimeout(typeLog, Math.random() * 20 + 10); // Fast typing
+                } else {
+                    typingSpan.classList.remove('blinking-cursor');
+                }
+            }
+            typeLog();
+        }
+
+    </script>
+</body>
+</html>
